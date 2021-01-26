@@ -94,7 +94,7 @@ locations.forEach(function (location) {
 // Create base layers
 
 // Streetmap Layer
-var streetmap = L.tileLayer(
+var satelliteMap = L.tileLayer(
   "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
   {
     attribution:
@@ -102,12 +102,12 @@ var streetmap = L.tileLayer(
     tileSize: 512,
     maxZoom: 18,
     zoomOffset: -1,
-    id: "mapbox/streets-v11",
+    id: "mapbox/satellite-v9",
     accessToken: API_KEY,
   }
 );
 
-var lightmap = L.tileLayer(
+var grayscaleMap = L.tileLayer(
   "https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
   {
     attribution:
@@ -118,14 +118,26 @@ var lightmap = L.tileLayer(
   }
 );
 
+var outdoorsMap = L.tileLayer(
+  "https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
+  {
+    attribution:
+      'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    maxZoom: 18,
+    id: "outdoors-v11",
+    accessToken: API_KEY,
+  }
+);
+
 // Create two separate layer groups: one for cities and one for states
 var states = L.layerGroup(stateMarkers);
 var cities = L.layerGroup(cityMarkers);
 
 // Create a baseMaps object
 var baseMaps = {
-  "Street Map": streetmap,
-  "Light Map": lightmap,
+  Satellite: satelliteMap,
+  Grayscale: grayscaleMap,
+  Outdoors: outdoorsMap,
 };
 
 // Create an overlay object
@@ -137,8 +149,8 @@ var overlayMaps = {
 // Define a map object
 var myMap = L.map("mapid", {
   center: [39.8283, -98.5795],
-  zoom: 3.5,
-  layers: [streetmap, states, cities],
+  zoom: 3.4,
+  layers: [satelliteMap, states, cities],
 });
 
 // Pass our map layers into our layer control
