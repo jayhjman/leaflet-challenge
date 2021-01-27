@@ -246,21 +246,6 @@ function init() {
       collapsed: false,
     })
     .addTo(myMap);
-
-  // When someone toggles off/on the earthquake data remove/add legend
-  myMap
-    .on("overlayadd", function (eventLayer) {
-      // Toggle earthquake legend...
-      if (eventLayer.name === "Earthquakes") {
-        legend.addTo(this);
-      }
-    })
-    .on("overlayremove", function (eventLayer) {
-      // Toggle earthquake legend...
-      if (eventLayer.name === "Earthquakes") {
-        this.removeControl(legend);
-      }
-    });
 }
 
 // Execute the program
