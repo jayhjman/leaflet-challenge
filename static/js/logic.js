@@ -9,6 +9,19 @@ var geoJson = null;
 var maxDepth = 0;
 var minDepth = 9999999;
 
+var colors = [
+  "#008000",
+  "#ADFF2F",
+  "#FFFF00",
+  "#FFAE42",
+  "#FFA500",
+  "#FF4500",
+  "#FF0000",
+];
+
+const scale = (num, in_min, in_max, out_min, out_max) => {
+  return ((num - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min;
+};
 //
 // Fetch the data and pass the initial function you want called after.
 // This also sets the global geoJson variable to be used later in the
@@ -45,6 +58,20 @@ function getRadius(magnitude) {
   return magnitude * 3;
 }
 
+// Give each feature a popup describing the place and time of the earthquake
+function onEachFeatureFunc(feature, layer) {
+  layer.bindPopup(
+    "<h3>" +
+      feature.properties.place +
+      "</h3><hr><p>" +
+      new Date(feature.properties.time) +
+      "</p>" +
+      "<p>Depth: " +
+      feature.geometry.coordinates[2] +
+      "</p>"
+  );
+}
+
 //
 // Need to set the radius and color of the earthquake coordinates
 //
@@ -55,13 +82,34 @@ function pointToLayerFunc(feature, latlng) {
     minDepth,
     maxDepth
   );
-  var color = perc2color(normalized * 100, 0, 5);
 
-  console.log("depth:" + +feature.geometry.coordinates[2]);
-  console.log("percent:" + normalized * 100);
+  //   console.log(+feature.geometry.coordinates[2]);
+  //   console.log(
+  //     Math.round(
+  //       scale(+feature.geometry.coordinates[2], minDepth, maxDepth, 0, 6),
+  //       0
+  //     )
+  //   );
+
+  var scaler = Math.round(
+    scale(
+      +feature.geometry.coordinates[2],
+      minDepth,
+      maxDepth,
+      0,
+      colors.length - 1
+    ),
+    0
+  );
+
+  //var color = perc2color(normalized * 100, 0, 1);
+  var color = colors[scaler];
+
+  //.log("depth:" + +feature.geometry.coordinates[2]);
+  //console.log("percent:" + normalized * 100);
 
   return L.circleMarker(latlng, {
-    radius: getRadius(feature.properties.mag),
+    radius: getRadius(+feature.properties.mag),
     fillColor: color,
     color: color,
     weight: 1,
@@ -77,7 +125,7 @@ function init() {
   // This is it! Leaflet knows what to do with
   // each type of feature (held in the `geometry` key) and draws the correct markers.
   var earthquakes = L.geoJSON(geoJson.features, {
-    // onEachFeature: onEachFeatureFunc,
+    onEachFeature: onEachFeatureFunc,
     pointToLayer: pointToLayerFunc,
   });
 
@@ -150,33 +198,3 @@ function init() {
 }
 
 initData(init);
-
-// https://leafletjs.com/examples/geojson/
-// L.geoJSON() also gives us handy options, almost like a built in `.forEach()`
-// // Define a function we want to run once for each feature in the features array
-// // Give each feature a popup describing the place and time of the earthquake
-// function onEachFeatureFunc(feature, layer) {
-//   layer.bindPopup("<h3>" + feature.properties.place +
-//     "</h3><hr><p>" + new Date(feature.properties.time) + "</p>");
-// }
-
-// var geojsonMarkerOptions = {
-//   radius: 8,
-//   fillColor: "#ff7800",
-//   color: "#000",
-//   weight: 1,
-//   opacity: 1,
-//   fillOpacity: 0.8
-// };
-
-// function pointToLayerFunc(feature, latlng) {
-//   return L.circleMarker(latlng, geojsonMarkerOptions);
-// }
-
-// Create a GeoJSON layer containing the features array on the earthquakeData object
-// Run the onEachFeature function once for each piece of data in the array
-// Paste this into the .then() function
-// var earthquakes = L.geoJSON(data.features, {
-//   onEachFeature: onEachFeatureFunc,
-//   pointToLayer: pointToLayerFunc
-// });
