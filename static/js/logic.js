@@ -5,6 +5,7 @@ var url =
 // geoJson data to be used by the map
 var geoJson = null;
 
+// Color pallette to use for circles
 var colors = [
   "#008000",
   "#ADFF2F",
@@ -15,6 +16,10 @@ var colors = [
   "#FF0000",
 ];
 
+//
+// Get a color based upon the range of values
+// use that to display the circles and legend
+//
 function getColors(value) {
   var valueColor = colors[0];
   switch (true) {
@@ -50,9 +55,9 @@ function initData(initFunc) {
   d3.json(url)
     .then(
       function (data) {
-        console.log(data.features);
         // Store the data into the global variable
         geoJson = data;
+        // Convert the datatype so no issues
         geoJson.features.forEach(function (feature) {
           feature.geometry.coordinates[2] = +feature.geometry.coordinates[2];
         });
@@ -75,12 +80,11 @@ function onEachFeatureFunc(feature, layer) {
   layer.bindPopup(
     "<h3>" +
       feature.properties.place +
-      "</h3><hr><p>" +
+      "</h3><hr>" +
       new Date(feature.properties.time) +
-      "</p>" +
-      "<p>Depth: " +
-      feature.geometry.coordinates[2] +
-      "</p>"
+      "<br/>" +
+      "Depth: " +
+      feature.geometry.coordinates[2]
   );
 }
 
@@ -168,6 +172,60 @@ function init() {
     zoom: 4,
     layers: [satelliteMap, earthquakes],
   });
+
+  var legend = L.control({ position: "bottomright" });
+
+  legend.onAdd = function (myMap) {
+    var div = L.DomUtil.create("div", "info legend");
+    var limits = [10, 30, 50, 70, 90, 110, 110];
+    var labels = [];
+
+    // Structure you legend html
+    var myHtmlBegin =
+      "<div class='my-legend'>" +
+      "  <div class='legend-title'>Earthquake Depth - Past 7 Days</div>" +
+      "     <div class='legend-scale'>" +
+      "      <ul class='legend-labels'>";
+    var myHtmlEnd =
+      "      </ul>" +
+      "    </div>" +
+      "  <div class='legend-source'>Source: <a href='https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php' target='_blank'>USGS Earthquake Hazards Program</a></div>" +
+      "</div>";
+
+    // Loop through setting up the legend colors and labels
+    var prevValue = 0;
+    limits.forEach(function (limit, index) {
+      // default to the standard label
+      var textLabel = prevValue + " - " + limits[index];
+      // First and last element require special formatting
+      if (prevValue === 0) {
+        textLabel = "< " + limits[index];
+      }
+      if (index === limits.length - 1) {
+        textLabel = "> " + limits[index];
+      }
+
+      // Add this label to the array
+      labels.push(
+        '<li><span style="background:' +
+          colors[index] +
+          '";></span>' +
+          textLabel +
+          "</li>"
+      );
+
+      // Update previous values
+      prevValue = limits[index];
+    });
+
+    // construct the HTML for the legend
+    div.innerHTML = myHtmlBegin + labels.join("") + myHtmlEnd;
+
+    return div;
+  };
+
+  // Add the legend to the map
+  legend.addTo(myMap);
 
   // Create a layer control
   // Pass in our baseMaps and overlayMaps
