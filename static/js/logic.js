@@ -4,6 +4,7 @@ var url =
 
 // geoJson data to be used by the map
 var geoJson = null;
+var geoJsonPlates = null;
 
 // Color pallette to use for circles
 var colors = [
@@ -66,6 +67,12 @@ function initData(initFunc) {
         console.log(error);
       }
     )
+    .then(function () {
+      // Load the textonic plate data
+      d3.json("static/data/PB2002_plates.json").then((data) => {
+        geoJsonPlates = data;
+      });
+    })
     .then(initFunc);
 }
 
