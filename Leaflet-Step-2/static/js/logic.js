@@ -114,9 +114,10 @@ function pointToLayerFunc(feature, latlng) {
   return L.circleMarker(latlng, {
     radius: getRadius(feature.properties.mag),
     fillColor: color,
-    color: color,
+    color: "#1E1E1E",
     weight: 1,
     opacity: 1,
+    stroke: true,
     fillOpacity: 0.8,
   });
 }

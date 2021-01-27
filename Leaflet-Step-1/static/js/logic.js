@@ -107,9 +107,10 @@ function pointToLayerFunc(feature, latlng) {
   return L.circleMarker(latlng, {
     radius: getRadius(feature.properties.mag),
     fillColor: color,
-    color: color,
+    color: "#1E1E1E",
     weight: 1,
     opacity: 1,
+    stroke: true,
     fillOpacity: 0.8,
   });
 }
@@ -149,8 +150,8 @@ function init() {
 
   // Create our map, giving it the streetmap and earthquakes layers to display on load
   var myMap = L.map("mapid", {
-    center: [28.0, -35.0],
-    zoom: 3,
+    center: [40.7608, -111.891],
+    zoom: 5,
     layers: [grayscaleMap, earthquakes],
   });
 
@@ -209,15 +210,6 @@ function init() {
 
   // Add the legend to the map
   legend.addTo(myMap);
-
-  // Create a layer control
-  // Pass in our baseMaps and overlayMaps
-  // Add the layer control to the map
-  L.control
-    .layers(baseMaps, overlayMaps, {
-      collapsed: false,
-    })
-    .addTo(myMap);
 }
 
 // Execute the program
