@@ -47,6 +47,13 @@ function getColors(value) {
   }
   return valueColor;
 }
+
+// Load the tectonic plate data
+d3.json("static/data/PB2002_boundaries.json").then((plates) => {
+  // console.log(plates.features);
+  geoJsonPlates = plates;
+});
+
 //
 // Fetch the data and pass the initial function you want called after.
 // This also sets the global geoJson variable to be used later in the
@@ -67,12 +74,6 @@ function initData(initFunc) {
         console.log(error);
       }
     )
-    .then(function () {
-      // Load the textonic plate data
-      d3.json("static/data/PB2002_plates.json").then((data) => {
-        geoJsonPlates = data;
-      });
-    })
     .then(initFunc);
 }
 
@@ -115,12 +116,14 @@ function pointToLayerFunc(feature, latlng) {
 // Initialize the mapping visualization
 //
 function init() {
-  // This is it! Leaflet knows what to do with
-  // each type of feature (held in the `geometry` key) and draws the correct markers.
+  // Load the earthquake data via geoJSON
   var earthquakes = L.geoJSON(geoJson.features, {
     onEachFeature: onEachFeatureFunc,
     pointToLayer: pointToLayerFunc,
   });
+
+  // Load the tectonic plate data via geoJSON
+  var plates = L.geoJSON(geoJsonPlates.features);
 
   // Create base layers
   // Satellite Layer
@@ -171,6 +174,7 @@ function init() {
   // Create overlay object to hold our overlay layer
   var overlayMaps = {
     Earthquakes: earthquakes,
+    Plates: plates,
   };
 
   // Create our map, giving it the streetmap and earthquakes layers to display on load
