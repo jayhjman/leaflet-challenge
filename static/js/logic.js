@@ -90,10 +90,13 @@ function onEachFeatureFunc(feature, layer) {
     "<h3>" +
       feature.properties.place +
       "</h3><hr>" +
-      new Date(feature.properties.time) +
+      "Magnitude: " +
+      feature.properties.mag +
       "<br/>" +
       "Depth: " +
-      feature.geometry.coordinates[2]
+      feature.geometry.coordinates[2] +
+      "<br/>" +
+      new Date(feature.properties.time)
   );
 }
 
