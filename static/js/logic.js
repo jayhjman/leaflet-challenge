@@ -5,6 +5,10 @@ var url =
 // geoJson data to be used by the map
 var geoJson = null;
 
+// Calculate the min/max earthquake depths
+var maxDepth = 0;
+var minDepth = 9999999;
+
 //
 // Fetch the data and pass the initial function you want called after.
 // This also sets the global geoJson variable to be used later in the
@@ -17,6 +21,16 @@ function initData(initFunc) {
         console.log(data.features);
         // Store the data into the global variable
         geoJson = data;
+        geoJson.features.forEach(function (feature) {
+          // Get the min and max of earthquake depth to map colors
+          var depth = +feature.geometry.coordinates[2];
+          if (depth > maxDepth) {
+            maxDepth = depth;
+          }
+          if (depth < minDepth) {
+            minDepth = depth;
+          }
+        });
       },
       function (error) {
         console.log(error);
@@ -25,18 +39,36 @@ function initData(initFunc) {
     .then(initFunc);
 }
 
-// function pointToLayerFunc(feature, latlng) {
-//   console.log(feature);
-//   console.log(latlng);
-//   return L.circleMarker(latlng, {
-//     radius: 100,
-//     fillColor: "red",
-//     color: "red",
-//     weight: 1,
-//     opacity: 1,
-//     fillOpacity: 0.8,
-//   });
-// }
+//
+// Get a circle radius base on magnatude
+function getRadius(magnitude) {
+  return magnitude * 3;
+}
+
+//
+// Need to set the radius and color of the earthquake coordinates
+//
+function pointToLayerFunc(feature, latlng) {
+  // Get the normalized value for depth
+  var normalized = normalize(
+    +feature.geometry.coordinates[2],
+    minDepth,
+    maxDepth
+  );
+  var color = perc2color(normalized * 100, 0, 5);
+
+  console.log("depth:" + +feature.geometry.coordinates[2]);
+  console.log("percent:" + normalized * 100);
+
+  return L.circleMarker(latlng, {
+    radius: getRadius(feature.properties.mag),
+    fillColor: color,
+    color: color,
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.8,
+  });
+}
 
 //
 // Initialize the mapping visualization
@@ -44,12 +76,10 @@ function initData(initFunc) {
 function init() {
   // This is it! Leaflet knows what to do with
   // each type of feature (held in the `geometry` key) and draws the correct markers.
-  var earthquakes = L.geoJSON(geoJson.features);
-
-  //   var earthquakeMarkers = L.geoJSON(geoJson.features, {
-  //     //onEachFeature: onEachFeatureFunc,
-  //     pointToLayer: pointToLayerFunc,
-  //   });
+  var earthquakes = L.geoJSON(geoJson.features, {
+    // onEachFeature: onEachFeatureFunc,
+    pointToLayer: pointToLayerFunc,
+  });
 
   // Create base layers
   // Satellite Layer
@@ -105,7 +135,7 @@ function init() {
   // Create our map, giving it the streetmap and earthquakes layers to display on load
   var myMap = L.map("mapid", {
     center: [37.09, -95.71],
-    zoom: 5,
+    zoom: 4,
     layers: [satelliteMap, earthquakes],
   });
 
