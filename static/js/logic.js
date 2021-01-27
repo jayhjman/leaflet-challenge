@@ -5,10 +5,6 @@ var url =
 // geoJson data to be used by the map
 var geoJson = null;
 
-// Calculate the min/max earthquake depths
-var maxDepth = 0;
-var minDepth = 9999999;
-
 var colors = [
   "#008000",
   "#ADFF2F",
@@ -19,9 +15,32 @@ var colors = [
   "#FF0000",
 ];
 
-const scale = (num, in_min, in_max, out_min, out_max) => {
-  return ((num - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min;
-};
+function getColors(value) {
+  var valueColor = colors[0];
+  switch (true) {
+    case value < 10.0:
+      valueColor = colors[0];
+      break;
+    case value < 30.0:
+      valueColor = colors[1];
+      break;
+    case value < 50.0:
+      valueColor = colors[2];
+      break;
+    case value < 70.0:
+      valueColor = colors[3];
+      break;
+    case value < 90.0:
+      valueColor = colors[4];
+      break;
+    case value < 110.0:
+      valueColor = colors[5];
+      break;
+    default:
+      valueColor = colors[6];
+  }
+  return valueColor;
+}
 //
 // Fetch the data and pass the initial function you want called after.
 // This also sets the global geoJson variable to be used later in the
@@ -35,14 +54,7 @@ function initData(initFunc) {
         // Store the data into the global variable
         geoJson = data;
         geoJson.features.forEach(function (feature) {
-          // Get the min and max of earthquake depth to map colors
-          var depth = +feature.geometry.coordinates[2];
-          if (depth > maxDepth) {
-            maxDepth = depth;
-          }
-          if (depth < minDepth) {
-            minDepth = depth;
-          }
+          feature.geometry.coordinates[2] = +feature.geometry.coordinates[2];
         });
       },
       function (error) {
@@ -76,37 +88,7 @@ function onEachFeatureFunc(feature, layer) {
 // Need to set the radius and color of the earthquake coordinates
 //
 function pointToLayerFunc(feature, latlng) {
-  // Get the normalized value for depth
-  var normalized = normalize(
-    +feature.geometry.coordinates[2],
-    minDepth,
-    maxDepth
-  );
-
-  //   console.log(+feature.geometry.coordinates[2]);
-  //   console.log(
-  //     Math.round(
-  //       scale(+feature.geometry.coordinates[2], minDepth, maxDepth, 0, 6),
-  //       0
-  //     )
-  //   );
-
-  var scaler = Math.round(
-    scale(
-      +feature.geometry.coordinates[2],
-      minDepth,
-      maxDepth,
-      0,
-      colors.length - 1
-    ),
-    0
-  );
-
-  //var color = perc2color(normalized * 100, 0, 1);
-  var color = colors[scaler];
-
-  //.log("depth:" + +feature.geometry.coordinates[2]);
-  //console.log("percent:" + normalized * 100);
+  var color = getColors(feature.geometry.coordinates[2]);
 
   return L.circleMarker(latlng, {
     radius: getRadius(+feature.properties.mag),
