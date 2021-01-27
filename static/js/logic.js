@@ -6,8 +6,6 @@ var url =
 var geoJson = null;
 var geoJsonPlates = null;
 
-var earthquakeLegend = true;
-
 // Color pallette to use for circles
 var colors = [
   "#008000",
