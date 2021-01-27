@@ -1,74 +1,20 @@
-// An array containing all of the information needed to create city and state markers
-var locations = [
-  {
-    coordinates: [40.7128, -74.0059],
-    state: {
-      name: "New York State",
-      population: 19795791,
-    },
-    city: {
-      name: "New York",
-      population: 8550405,
-    },
-  },
-  {
-    coordinates: [34.0522, -118.2437],
-    state: {
-      name: "California",
-      population: 39250017,
-    },
-    city: {
-      name: "Los Angeles",
-      population: 3971883,
-    },
-  },
-  {
-    coordinates: [41.8781, -87.6298],
-    state: {
-      name: "Illinois",
-      population: 12671821,
-    },
-    city: {
-      name: "Chicago",
-      population: 2695598,
-    },
-  },
-  {
-    coordinates: [29.7604, -95.3698],
-    state: {
-      name: "Texas",
-      population: 26960000,
-    },
-    city: {
-      name: "Houston",
-      population: 2296224,
-    },
-  },
-  {
-    coordinates: [41.2524, -95.998],
-    state: {
-      name: "Nebraska",
-      population: 1882000,
-    },
-    city: {
-      name: "Omaha",
-      population: 446599,
-    },
-  },
-];
-
 // USGS 7 Day Earth Quake geoJson data
 var url =
   "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
 
-var geoJson;
+// geoJson data to be used by the map
+var geoJson = null;
 
-// Fetch the data
+//
+// Fetch the data and pass the initial function you want called after.
+// This also sets the global geoJson variable to be used later in the
+// code
+//
 function initData(initFunc) {
   d3.json(url)
     .then(
       function (data) {
-        console.log(data);
+        console.log(data.features);
         // Store the data into the global variable
         geoJson = data;
       },
@@ -79,46 +25,33 @@ function initData(initFunc) {
     .then(initFunc);
 }
 
-// Function to determine marker size based on population
-function markerSize(population) {
-  return population / 40;
-}
+// function pointToLayerFunc(feature, latlng) {
+//   console.log(feature);
+//   console.log(latlng);
+//   return L.circleMarker(latlng, {
+//     radius: 100,
+//     fillColor: "red",
+//     color: "red",
+//     weight: 1,
+//     opacity: 1,
+//     fillOpacity: 0.8,
+//   });
+// }
 
 //
 // Initialize the mapping visualization
 //
 function init() {
-  // Define arrays to hold created city and state markers
-  var cityMarkers = [];
-  var stateMarkers = [];
+  // This is it! Leaflet knows what to do with
+  // each type of feature (held in the `geometry` key) and draws the correct markers.
+  var earthquakes = L.geoJSON(geoJson.features);
 
-  // Loop through locations and create city and state markers
-  locations.forEach(function (location) {
-    // Setting the marker radius for the state by passing population into the markerSize function
-    stateMarkers.push(
-      L.circle(location.coordinates, {
-        stroke: false,
-        fillOpacity: 0.75,
-        color: "white",
-        fillColor: "white",
-        radius: markerSize(location.state.population),
-      })
-    );
-
-    // Setting the marker radius for the city by passing population into the markerSize function
-    cityMarkers.push(
-      L.circle(location.coordinates, {
-        stroke: false,
-        fillOpacity: 0.75,
-        color: "purple",
-        fillColor: "purple",
-        radius: markerSize(location.city.population),
-      })
-    );
-  });
+  //   var earthquakeMarkers = L.geoJSON(geoJson.features, {
+  //     //onEachFeature: onEachFeatureFunc,
+  //     pointToLayer: pointToLayerFunc,
+  //   });
 
   // Create base layers
-
   // Satellite Layer
   var satelliteMap = L.tileLayer(
     "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
@@ -157,31 +90,27 @@ function init() {
     }
   );
 
-  // Create two separate layer groups: one for cities and one for states
-  var states = L.layerGroup(stateMarkers);
-  var cities = L.layerGroup(cityMarkers);
-
-  // Create a baseMaps object
+  // Define a baseMaps object to hold our base layers
   var baseMaps = {
     Satellite: satelliteMap,
     Grayscale: grayscaleMap,
     Outdoors: outdoorsMap,
   };
 
-  // Create an overlay object
+  // Create overlay object to hold our overlay layer
   var overlayMaps = {
-    "State Population": states,
-    "City Population": cities,
+    Earthquakes: earthquakes,
   };
 
-  // Define a map object
+  // Create our map, giving it the streetmap and earthquakes layers to display on load
   var myMap = L.map("mapid", {
-    center: [39.8283, -98.5795],
-    zoom: 3.4,
-    layers: [satelliteMap, states, cities],
+    center: [37.09, -95.71],
+    zoom: 5,
+    layers: [satelliteMap, earthquakes],
   });
 
-  // Pass our map layers into our layer control
+  // Create a layer control
+  // Pass in our baseMaps and overlayMaps
   // Add the layer control to the map
   L.control
     .layers(baseMaps, overlayMaps, {
@@ -191,3 +120,33 @@ function init() {
 }
 
 initData(init);
+
+// https://leafletjs.com/examples/geojson/
+// L.geoJSON() also gives us handy options, almost like a built in `.forEach()`
+// // Define a function we want to run once for each feature in the features array
+// // Give each feature a popup describing the place and time of the earthquake
+// function onEachFeatureFunc(feature, layer) {
+//   layer.bindPopup("<h3>" + feature.properties.place +
+//     "</h3><hr><p>" + new Date(feature.properties.time) + "</p>");
+// }
+
+// var geojsonMarkerOptions = {
+//   radius: 8,
+//   fillColor: "#ff7800",
+//   color: "#000",
+//   weight: 1,
+//   opacity: 1,
+//   fillOpacity: 0.8
+// };
+
+// function pointToLayerFunc(feature, latlng) {
+//   return L.circleMarker(latlng, geojsonMarkerOptions);
+// }
+
+// Create a GeoJSON layer containing the features array on the earthquakeData object
+// Run the onEachFeature function once for each piece of data in the array
+// Paste this into the .then() function
+// var earthquakes = L.geoJSON(data.features, {
+//   onEachFeature: onEachFeatureFunc,
+//   pointToLayer: pointToLayerFunc
+// });
