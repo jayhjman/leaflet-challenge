@@ -6,6 +6,8 @@ var url =
 var geoJson = null;
 var geoJsonPlates = null;
 
+var earthquakeLegend = true;
+
 // Color pallette to use for circles
 var colors = [
   "#008000",
@@ -123,7 +125,11 @@ function init() {
   });
 
   // Load the tectonic plate data via geoJSON
-  var plates = L.geoJSON(geoJsonPlates.features);
+  var plates = L.geoJSON(geoJsonPlates.features, {
+    style: {
+      color: "#E25822",
+    },
+  });
 
   // Create base layers
   // Satellite Layer
@@ -174,13 +180,13 @@ function init() {
   // Create overlay object to hold our overlay layer
   var overlayMaps = {
     Earthquakes: earthquakes,
-    Plates: plates,
+    "Tectonic Plates": plates,
   };
 
   // Create our map, giving it the streetmap and earthquakes layers to display on load
   var myMap = L.map("mapid", {
-    center: [37.09, -95.71],
-    zoom: 4,
+    center: [28.0, -35.0],
+    zoom: 3,
     layers: [satelliteMap, earthquakes],
   });
 
@@ -246,6 +252,20 @@ function init() {
       collapsed: false,
     })
     .addTo(myMap);
+
+  myMap
+    .on("overlayadd", function (eventLayer) {
+      // Toggle earthquake legend...
+      if (eventLayer.name === "Earthquakes") {
+        legend.addTo(this);
+      }
+    })
+    .on("overlayremove", function (eventLayer) {
+      // Toggle earthquake legend...
+      if (eventLayer.name === "Earthquakes") {
+        this.removeControl(legend);
+      }
+    });
 }
 
 initData(init);
