@@ -80,11 +80,15 @@ function initData(initFunc) {
 
 //
 // Get a circle radius base on magnatude
+//
 function getRadius(magnitude) {
   return magnitude * 3;
 }
 
-// Give each feature a popup describing the place and time of the earthquake
+//
+// Give each feature a popup describing the place, magnitude, depth and
+// time of the earthquake
+//
 function onEachFeatureFunc(feature, layer) {
   layer.bindPopup(
     "<h3>" +
@@ -101,11 +105,12 @@ function onEachFeatureFunc(feature, layer) {
 }
 
 //
-// Need to set the radius and color of the earthquake coordinates
+// Need to set the properties of the circle marker for the earthquake
 //
 function pointToLayerFunc(feature, latlng) {
   var color = getColors(feature.geometry.coordinates[2]);
 
+  // Return the marker at the lat-long
   return L.circleMarker(latlng, {
     radius: getRadius(feature.properties.mag),
     fillColor: color,
@@ -192,8 +197,10 @@ function init() {
     layers: [satelliteMap, earthquakes],
   });
 
+  // Place the legend control
   var legend = L.control({ position: "bottomright" });
 
+  // Build the legend based upon the color scale ranges and label
   legend.onAdd = function (myMap) {
     var div = L.DomUtil.create("div", "info legend");
     var limits = [10, 30, 50, 70, 90, 110, 110];
@@ -271,4 +278,5 @@ function init() {
     });
 }
 
+// Execute the program
 initData(init);
