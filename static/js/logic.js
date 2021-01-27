@@ -68,6 +68,7 @@ function initData(initFunc) {
         // Convert the datatype so no issues
         geoJson.features.forEach(function (feature) {
           feature.geometry.coordinates[2] = +feature.geometry.coordinates[2];
+          feature.properties.mag = +feature.properties.mag;
         });
       },
       function (error) {
@@ -103,7 +104,7 @@ function pointToLayerFunc(feature, latlng) {
   var color = getColors(feature.geometry.coordinates[2]);
 
   return L.circleMarker(latlng, {
-    radius: getRadius(+feature.properties.mag),
+    radius: getRadius(feature.properties.mag),
     fillColor: color,
     color: color,
     weight: 1,
@@ -251,6 +252,7 @@ function init() {
     })
     .addTo(myMap);
 
+  // When someone toggles off/on the earthquake data remove/add legend
   myMap
     .on("overlayadd", function (eventLayer) {
       // Toggle earthquake legend...
