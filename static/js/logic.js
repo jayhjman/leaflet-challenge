@@ -1,8 +1,3 @@
-// Function to determine marker size based on population
-function markerSize(population) {
-  return population / 40;
-}
-
 // An array containing all of the information needed to create city and state markers
 var locations = [
   {
@@ -62,101 +57,137 @@ var locations = [
   },
 ];
 
-// Define arrays to hold created city and state markers
-var cityMarkers = [];
-var stateMarkers = [];
+// USGS 7 Day Earth Quake geoJson data
+var url =
+  "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
 
-// Loop through locations and create city and state markers
-locations.forEach(function (location) {
-  // Setting the marker radius for the state by passing population into the markerSize function
-  stateMarkers.push(
-    L.circle(location.coordinates, {
-      stroke: false,
-      fillOpacity: 0.75,
-      color: "white",
-      fillColor: "white",
-      radius: markerSize(location.state.population),
-    })
+var geoJson;
+
+// Fetch the data
+function initData(initFunc) {
+  d3.json(url)
+    .then(
+      function (data) {
+        console.log(data);
+        // Store the data into the global variable
+        geoJson = data;
+      },
+      function (error) {
+        console.log(error);
+      }
+    )
+    .then(initFunc);
+}
+
+// Function to determine marker size based on population
+function markerSize(population) {
+  return population / 40;
+}
+
+//
+// Initialize the mapping visualization
+//
+function init() {
+  // Define arrays to hold created city and state markers
+  var cityMarkers = [];
+  var stateMarkers = [];
+
+  // Loop through locations and create city and state markers
+  locations.forEach(function (location) {
+    // Setting the marker radius for the state by passing population into the markerSize function
+    stateMarkers.push(
+      L.circle(location.coordinates, {
+        stroke: false,
+        fillOpacity: 0.75,
+        color: "white",
+        fillColor: "white",
+        radius: markerSize(location.state.population),
+      })
+    );
+
+    // Setting the marker radius for the city by passing population into the markerSize function
+    cityMarkers.push(
+      L.circle(location.coordinates, {
+        stroke: false,
+        fillOpacity: 0.75,
+        color: "purple",
+        fillColor: "purple",
+        radius: markerSize(location.city.population),
+      })
+    );
+  });
+
+  // Create base layers
+
+  // Satellite Layer
+  var satelliteMap = L.tileLayer(
+    "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
+    {
+      attribution:
+        "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
+      tileSize: 512,
+      maxZoom: 18,
+      zoomOffset: -1,
+      id: "mapbox/satellite-v9",
+      accessToken: API_KEY,
+    }
   );
 
-  // Setting the marker radius for the city by passing population into the markerSize function
-  cityMarkers.push(
-    L.circle(location.coordinates, {
-      stroke: false,
-      fillOpacity: 0.75,
-      color: "purple",
-      fillColor: "purple",
-      radius: markerSize(location.city.population),
-    })
+  // Grayscale Layer
+  var grayscaleMap = L.tileLayer(
+    "https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
+    {
+      attribution:
+        'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+      maxZoom: 18,
+      id: "light-v10",
+      accessToken: API_KEY,
+    }
   );
-});
 
-// Create base layers
+  // Outdoors Layer
+  var outdoorsMap = L.tileLayer(
+    "https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
+    {
+      attribution:
+        'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+      maxZoom: 18,
+      id: "outdoors-v11",
+      accessToken: API_KEY,
+    }
+  );
 
-// Streetmap Layer
-var satelliteMap = L.tileLayer(
-  "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
-  {
-    attribution:
-      "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
-    tileSize: 512,
-    maxZoom: 18,
-    zoomOffset: -1,
-    id: "mapbox/satellite-v9",
-    accessToken: API_KEY,
-  }
-);
+  // Create two separate layer groups: one for cities and one for states
+  var states = L.layerGroup(stateMarkers);
+  var cities = L.layerGroup(cityMarkers);
 
-var grayscaleMap = L.tileLayer(
-  "https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
-  {
-    attribution:
-      'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-    maxZoom: 18,
-    id: "light-v10",
-    accessToken: API_KEY,
-  }
-);
+  // Create a baseMaps object
+  var baseMaps = {
+    Satellite: satelliteMap,
+    Grayscale: grayscaleMap,
+    Outdoors: outdoorsMap,
+  };
 
-var outdoorsMap = L.tileLayer(
-  "https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
-  {
-    attribution:
-      'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-    maxZoom: 18,
-    id: "outdoors-v11",
-    accessToken: API_KEY,
-  }
-);
+  // Create an overlay object
+  var overlayMaps = {
+    "State Population": states,
+    "City Population": cities,
+  };
 
-// Create two separate layer groups: one for cities and one for states
-var states = L.layerGroup(stateMarkers);
-var cities = L.layerGroup(cityMarkers);
+  // Define a map object
+  var myMap = L.map("mapid", {
+    center: [39.8283, -98.5795],
+    zoom: 3.4,
+    layers: [satelliteMap, states, cities],
+  });
 
-// Create a baseMaps object
-var baseMaps = {
-  Satellite: satelliteMap,
-  Grayscale: grayscaleMap,
-  Outdoors: outdoorsMap,
-};
+  // Pass our map layers into our layer control
+  // Add the layer control to the map
+  L.control
+    .layers(baseMaps, overlayMaps, {
+      collapsed: false,
+    })
+    .addTo(myMap);
+}
 
-// Create an overlay object
-var overlayMaps = {
-  "State Population": states,
-  "City Population": cities,
-};
-
-// Define a map object
-var myMap = L.map("mapid", {
-  center: [39.8283, -98.5795],
-  zoom: 3.4,
-  layers: [satelliteMap, states, cities],
-});
-
-// Pass our map layers into our layer control
-// Add the layer control to the map
-L.control
-  .layers(baseMaps, overlayMaps, {
-    collapsed: false,
-  })
-  .addTo(myMap);
+initData(init);
