@@ -45,7 +45,7 @@
 1. Change into the [`repository directory`](https://github.com/jayhjman/leaflet-challenge) and then into [`Leaflet-Step-1/static/js`](Leaflet-Step-1/static/js)
 1. In the `Leaflet-Step-1/static/js` directory create a file called `config.js` and add the following line:
 
-   - const API_KEY = "YOUR MAPBOX API KEY HERE";
+   - `const API_KEY = "YOUR MAPBOX API KEY HERE";`
 
    Replace the value in the double quotes above with the version of the key created at [Mapbox](https://www.mapbox.com/)
 
