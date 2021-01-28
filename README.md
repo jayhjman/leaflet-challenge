@@ -37,3 +37,26 @@
   ![screen_2.3](images/Screenshot_2.3.jpg)
 
   ![screen_2.4](images/Screenshot_2.4.jpg)
+
+## Execution
+
+1. The assumption is that you have a working Python 3.6 environment
+1. Clone the [`git repository`](https://github.com/jayhjman/leaflet-challenge) for this project
+1. Change into the [`repository directory`](https://github.com/jayhjman/leaflet-challenge) and then into [`Leaflet-Step-1/static/js`](Leaflet-Step-1/static/js)
+1. In the `Leaflet-Step-1/static/js` directory create a file called `config.js` and add the following line:
+
+   - const API_KEY = "YOUR MAPBOX API KEY HERE";
+
+   Replace the value in the double quotes above with the version of the key created at [Mapbox](https://www.mapbox.com/)
+
+1. Repeat the step above for the [`Leaflet-Step-2/static/js`](Leaflet-Step-2/static/js) `config.js`
+1. Now change into the directory [`Leaflet-Step-1/`](Leaflet-Step-1/) and run at command line:
+
+   - `python -m http.server`
+
+1. Open up a browser and go to [http://localhost:8000/](http://localhost:8000/)
+1. Once completed with [`Leaflet-Step-1/`](Leaflet-Step-1/), repeat last the last 2 steps for [`Leaflet-Step-2/`](Leaflet-Step-2/)
+
+## Author
+
+Made by [Jay](https://www.linkedin.com/in/jay-hastings-techy/) with :heart: in 2021
