@@ -16,7 +16,7 @@
 
   - [`Leaflet-Step-2/index.html`](Leaflet-Step-2/index.html) - Index page that has the base html and javascript libraries including the div element to place the map
 
-  - [`Leaflet-Step-2/static/js/logic.js`](Leaflet-Step-2/static/js/logic.js) - The primary application code file, it contains the code to call the map APIs, USGS geoJson APIs, and adds the map, legend, and controls to the [`Leaflet-Step-1/index.html`](Leaflet-Step-2/index.html)
+  - [`Leaflet-Step-2/static/js/logic.js`](Leaflet-Step-2/static/js/logic.js) - The primary application code file, it contains the code to call the map APIs, USGS geoJson APIs, and adds the map, legend, and controls to the [`Leaflet-Step-2/index.html`](Leaflet-Step-2/index.html)
 
   - [`Leaflet-Step-2/static/css/style.css`](Leaflet-Step-2/static/css/style.css) - The custom styling applied to the html elements for the legend and page
 
