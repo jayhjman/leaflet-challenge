@@ -3,7 +3,7 @@ var url =
   "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
 
 // geoJson data to be used by the map
-var geoJson = null;
+var geoJsonEarthquakes = null;
 
 // Color pallette to use for circles
 var colors = [
@@ -57,9 +57,9 @@ function initData(initFunc) {
     .then(
       function (data) {
         // Store the data into the global variable
-        geoJson = data;
+        geoJsonEarthquakes = data;
         // Convert the datatype so no issues
-        geoJson.features.forEach(function (feature) {
+        geoJsonEarthquakes.features.forEach(function (feature) {
           feature.geometry.coordinates[2] = +feature.geometry.coordinates[2];
           feature.properties.mag = +feature.properties.mag;
         });
@@ -120,7 +120,7 @@ function pointToLayerFunc(feature, latlng) {
 //
 function init() {
   // Load the earthquake data via geoJSON
-  var earthquakes = L.geoJSON(geoJson.features, {
+  var earthquakes = L.geoJSON(geoJsonEarthquakes.features, {
     onEachFeature: onEachFeatureFunc,
     pointToLayer: pointToLayerFunc,
   });

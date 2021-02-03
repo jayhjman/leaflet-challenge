@@ -2,8 +2,10 @@
 var url =
   "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
 
+var platesFile = "static/data/PB2002_boundaries.json";
+
 // geoJson data to be used by the map
-var geoJson = null;
+var geoJsonEarthquakes = null;
 var geoJsonPlates = null;
 
 // Color pallette to use for circles
@@ -48,25 +50,26 @@ function getColors(value) {
   return valueColor;
 }
 
-// Load the tectonic plate data
-d3.json("static/data/PB2002_boundaries.json").then((plates) => {
-  // console.log(plates.features);
-  geoJsonPlates = plates;
-});
-
 //
 // Fetch the data and pass the initial function you want called after.
 // This also sets the global geoJson variable to be used later in the
 // code
 //
 function initData(initFunc) {
+  // Load the tectonic plate data
+  d3.json(platesFile).then((plates) => {
+    // console.log(plates.features);
+    geoJsonPlates = plates;
+  });
+
+  // Load the earthquakes data
   d3.json(url)
     .then(
       function (data) {
         // Store the data into the global variable
-        geoJson = data;
+        geoJsonEarthquakes = data;
         // Convert the datatype so no issues
-        geoJson.features.forEach(function (feature) {
+        geoJsonEarthquakes.features.forEach(function (feature) {
           feature.geometry.coordinates[2] = +feature.geometry.coordinates[2];
           feature.properties.mag = +feature.properties.mag;
         });
@@ -127,7 +130,7 @@ function pointToLayerFunc(feature, latlng) {
 //
 function init() {
   // Load the earthquake data via geoJSON
-  var earthquakes = L.geoJSON(geoJson.features, {
+  var earthquakes = L.geoJSON(geoJsonEarthquakes.features, {
     onEachFeature: onEachFeatureFunc,
     pointToLayer: pointToLayerFunc,
   });
